@@ -8,4 +8,10 @@ export class UsersService {
   findAll() {
     return this.prisma.user.findMany();
   }
+
+  findOne(id: string) {
+    return this.prisma.user.findUniqueOrThrow({
+      where: { id }
+    });
+  }
 }
