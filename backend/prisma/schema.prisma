@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+model Device {
+  id          String        @id @default(uuid())
+  hostname    String
+  os          String
+  agentToken  String        @unique
+  status      DeviceStatus
+  lastSeen    DateTime?
+  createdAt   DateTime      @default(now())
+
+  metrics     Metric[]
+  alerts      Alert[]
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+}
+
+model Metric   {
+  id        BigInt      @id @default(autoincrement())
+  deviceId  String
+  name      MetricName
+  value     Float
+  timestamp DateTime
+
+  device    Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  @@index([deviceId, timestamp(sort: Desc)])
+}
+
+enum MetricName {
+  CPU_USAGE
+  RAM_USAGE
+  DISK_USAGE
+  DISK_READ
+  DISK_WRITE
+  NET_RX
+  NET_TX
+}
+
+model Alert {
+  id            String        @id @default(ulid())
+  deviceId      String
+  metric        MetricName
+  threshold     Float
+  severity      AlertSeverity
+  acknowledged  Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+
+  device        Device        @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+}
+
+enum AlertSeverity {
+  WARNING
+  CRITICAL
+}
