@@ -28,16 +28,13 @@ export class UsersController {
 
   @Post()
   @HttpCode(201)
-  async createUser(@Body() dto: CreateUserDto): Promise<void> {
+  async createUser(@Body() dto: CreateUserDto) {
     await this.usersService.create(dto);
   }
 
   @Patch(':id')
   @HttpCode(204)
-  async updateUser(
-    @Param('id') id: string,
-    @Body() dto: UpdateUserDto,
-  ): Promise<void> {
+  async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     await this.usersService.update(id, dto);
   }
 

@@ -24,10 +24,11 @@ enum Role {
 
 model Device {
   id          String        @id @default(uuid())
+  name        String
   hostname    String
   os          String
   agentToken  String        @unique
-  status      DeviceStatus
+  status      DeviceStatus  @default(OFFLINE)
   lastSeen    DateTime?
   createdAt   DateTime      @default(now())
 

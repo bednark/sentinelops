@@ -6,7 +6,13 @@ import { MetricsModule } from './metrics/metrics.module';
 import { AlertsModule } from './alerts/alerts.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, DevicesModule, MetricsModule, AlertsModule],
+  imports: [
+    PrismaModule,
+    UsersModule,
+    DevicesModule,
+    MetricsModule,
+    AlertsModule,
+  ],
   controllers: [],
   providers: [],
 })

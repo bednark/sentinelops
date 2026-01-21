@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { userRestSelect } from './users.select';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,7 +16,7 @@ export class UsersService {
 
   findAll() {
     return this.prisma.user.findMany({
-      select: userRestSelect
+      select: userRestSelect,
     });
   }
 
@@ -24,8 +28,7 @@ export class UsersService {
       });
 
       return user;
-    }
-    catch (e) {
+    } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2025')
           throw new NotFoundException(`User with id '${id}' not found`);
@@ -42,14 +45,15 @@ export class UsersService {
           email: dto.email,
           passwordHash,
           role: dto.role,
-        }
+        },
       });
-    }
-    catch (e) {
+    } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2002')
-          throw new ConflictException(`User with email ${dto.email} already exists`)
-      
+          throw new ConflictException(
+            `User with email '${dto.email}' already exists`,
+          );
+
       throw e;
     }
   }
@@ -57,25 +61,26 @@ export class UsersService {
   async update(id: string, dto: UpdateUserDto) {
     const data: Prisma.UserUpdateInput = {};
 
-    if (dto.email)
-      data.email = dto.email;
+    if (dto.email) data.email = dto.email;
 
-    if (dto.role)
-      data.role = dto.role;
+    if (dto.role) data.role = dto.role;
 
-    if (dto.password)
-      data.passwordHash = await bcrypt.hash(dto.password, 12);
+    if (dto.password) data.passwordHash = await bcrypt.hash(dto.password, 12);
 
     try {
       await this.prisma.user.update({
         where: { id },
         data,
       });
-    }
-    catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError)
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
           throw new NotFoundException(`User with id '${id}' not found`);
+        if (e.code === 'P2002')
+          throw new ConflictException(
+            `User with email '${dto.email}' already exists`,
+          );
+      }
 
       throw e;
     }
@@ -86,8 +91,7 @@ export class UsersService {
       await this.prisma.user.delete({
         where: { id },
       });
-    }
-    catch (e) {
+    } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2025')
           throw new NotFoundException(`User with id '${id}' not found`);
