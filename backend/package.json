@@ -71,6 +71,10 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "moduleNameMapper": {
+      "^\\.\\/internal\\/(.*)\\.js$": "<rootDir>/../generated/prisma/internal/$1.ts",
+      "^\\.\\/enums\\.js$": "<rootDir>/../generated/prisma/enums.ts"
+    },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
