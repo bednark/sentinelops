@@ -4,6 +4,9 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/bednark/sentinelops/agent/internal"
@@ -11,7 +14,7 @@ import (
 	// "google.golang.org/grpc/credentials/insecure"
 )
 
-func main() {
+func getConfig() (string, string, string) {
 	configPath := flag.String(
 		"config",
 		"/etc/sentinelops/agent.json",
@@ -25,27 +28,53 @@ func main() {
 		log.Fatal("config error:", err)
 	}
 
-	sender := internal.NewSender(cfg.Server)
+	return cfg.Server, cfg.DeviceID, cfg.Token
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func main() {
+	server, deviceId, _ := getConfig()
+	sender := internal.NewSender(server)
 
-	metricsToSend, err := internal.CollectMetrics(cfg.DeviceID)
-	if err != nil {
-		log.Println("metric collection error:", err)
-		return
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
+
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("shutdown signal received, exiting")
+			return
+		case <-ticker.C:
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			metricsToSend, err := internal.CollectMetrics(deviceId)
+			if err != nil {
+				log.Println("metric collection error:", err)
+				cancel()
+				continue
+			}
+
+			if len(metricsToSend) == 0 {
+				log.Println("no metrics collected, nothing to send")
+				cancel()
+				continue
+			}
+
+			err = sender.SendMetrics(ctx, metricsToSend)
+			if err != nil {
+				log.Println("send failed:", err)
+			} else {
+				log.Println("metrics sent successfully")
+			}
+
+			cancel()
+		}
 	}
-
-	if len(metricsToSend) == 0 {
-		log.Println("no metrics collected, nothing to send")
-		return
-	}
-
-	err = sender.SendMetrics(ctx, metricsToSend)
-	if err != nil {
-		log.Println("send failed:", err)
-		return
-	}
-
-	log.Println("metrics sent successfully")
 }
