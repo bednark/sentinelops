@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MetricsController } from './metrics.controller';
+import { MetricsGrpcController } from './metrics.grpc';
 
-describe('MetricsController', () => {
-  let controller: MetricsController;
+describe('MetricsGrpcController', () => {
+  let controller: MetricsGrpcController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MetricsController],
+      controllers: [MetricsGrpcController],
     }).compile();
 
-    controller = module.get<MetricsController>(MetricsController);
+    controller = module.get<MetricsGrpcController>(MetricsGrpcController);
   });
 
   it('should be defined', () => {
