@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package metrics;
+
+import "google/protobuf/timestamp.proto";
+
+service MetricsIngestService {
+  rpc StreamMetrics (stream Metric) returns (StreamMetricsResponse);
+}
+
+message Metric {
+  string deviceId = 1;
+  MetricName name = 2;
+  double value = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+enum MetricName {
+  METRIC_NAME_UNSPECIFIED = 0;
+  CPU_USAGE = 1;
+  RAM_USAGE = 2;
+  DISK_USAGE = 3;
+  DISK_READ = 4;
+  DISK_WRITE = 5;
+  NET_RX = 6;
+  NET_TX = 7;
+}
+
+message StreamMetricsResponse {
+  bool success = 1;
+  uint64 receivedCount = 2;
+}
