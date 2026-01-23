@@ -3,6 +3,7 @@ syntax = "proto3";
 package metrics;
 
 import "google/protobuf/timestamp.proto";
+option go_package = "./proto;metrics";
 
 service MetricsIngestService {
   rpc StreamMetrics (stream Metric) returns (StreamMetricsResponse);
