@@ -13,7 +13,7 @@ import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 
 @Controller('devices')
-export class DevicesController {
+export class DevicesRestController {
   constructor(private readonly devicesService: DevicesService) {}
 
   @Get()

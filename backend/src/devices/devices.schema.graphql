@@ -1,0 +1,21 @@
+scalar DateTime
+
+type Device {
+  id: ID!
+  name: String!
+  hostname: String!
+  os: String!
+  status: DeviceStatus!
+  lastSeen: DateTime
+  createdAt: DateTime!
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+}
+
+type Query {
+  devices: [Device!]!
+  device(id: ID!): Device
+}

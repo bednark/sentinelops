@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMetricDto } from './dto/create-metric.dto';
 import { Prisma } from '../../generated/prisma/client';
@@ -14,13 +14,32 @@ class DeviceNotFoundError extends Error {
 export class MetricsService {
   constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.device.findMany();
+  async findAll() {
+    try {
+      return await this.prisma.metric.findMany({
+        orderBy: { timestamp: 'desc' },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException('Failed to fetch metrics');
+    }
   }
 
   async findByDevice(deviceId: string) {
     try {
-      const metrics = await this.prisma.device.findUniqueOrThrow({
+      return await this.prisma.metric.findMany({
+        where: { deviceId },
+        orderBy: { timestamp: 'desc' },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(
+        `Failed to fetch metrics for device ${deviceId}`,
+      );
+    }
+  }
+
+  async findDevice(deviceId: string) {
+    try {
+      const device = await this.prisma.device.findUnique({
         where: { id: deviceId },
         select: {
           id: true,
@@ -30,25 +49,20 @@ export class MetricsService {
           status: true,
           lastSeen: true,
           createdAt: true,
-          metrics: {
-            select: {
-              value: true,
-              timestamp: true,
-              name: true,
-            },
-          },
         },
       });
 
-      return metrics;
+      if (!device) {
+        throw new Error('Device not found');
+      }
+
+      return device;
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2025')
-          throw new NotFoundException(`Metrics with deviceId '${deviceId}' not found`);
-    
-      throw e;
+      throw new InternalServerErrorException(
+        `Failed to resolve device ${deviceId}`,
+      );
     }
-  } 
+  }
 
   async create(dto: CreateMetricDto[]) {
     try {

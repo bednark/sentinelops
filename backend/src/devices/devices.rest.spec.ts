@@ -4,11 +4,11 @@ jest.mock('src/prisma/prisma.service', () => ({ PrismaService: jest.fn() }), {
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateDeviceDto, DeviceStatus } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
-import { DevicesController } from './devices.controller';
+import { DevicesRestController } from './devices.rest';
 import { DevicesService } from './devices.service';
 
-describe('DevicesController', () => {
-  let controller: DevicesController;
+describe('DevicesRestController', () => {
+  let controller: DevicesRestController;
   type FindAll = DevicesService['findAll'];
   type FindOne = DevicesService['findOne'];
   type Create = DevicesService['create'];
@@ -33,11 +33,11 @@ describe('DevicesController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [DevicesController],
+      controllers: [DevicesRestController],
       providers: [{ provide: DevicesService, useValue: serviceMock }],
     }).compile();
 
-    controller = module.get<DevicesController>(DevicesController);
+    controller = module.get<DevicesRestController>(DevicesRestController);
     service = module.get(DevicesService);
     jest.clearAllMocks();
   });

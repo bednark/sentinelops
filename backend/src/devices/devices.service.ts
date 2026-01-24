@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -18,17 +19,19 @@ export class DevicesService {
 
   async findOne(id: string) {
     try {
-      const device = await this.prisma.device.findUniqueOrThrow({
+      return await this.prisma.device.findUnique({
         where: { id },
       });
-
-      return device;
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2025')
-          throw new NotFoundException(`Device with id '${id} not found`);
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          return null;
+        }
+      }
 
-      throw e;
+      throw new InternalServerErrorException(
+        `Failed to fetch device ${id}`,
+      );
     }
   }
 

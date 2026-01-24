@@ -1,0 +1,23 @@
+scalar DateTime
+
+type Metric {
+  id: ID!
+  name: MetricName!
+  value: Float!
+  timestamp: DateTime!
+  device: Device!
+}
+
+enum MetricName {
+  CPU_USAGE
+  RAM_USAGE
+  DISK_USAGE
+  DISK_READ
+  DISK_WRITE
+  NET_RX
+  NET_TX
+}
+
+type Query {
+  metrics(deviceId: ID): [Metric!]!
+}
