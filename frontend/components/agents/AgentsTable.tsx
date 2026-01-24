@@ -1,10 +1,21 @@
+"use client"
+
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -12,15 +23,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
+
+/* =======================
+   TYPES & DATA
+======================= */
 
 type Agent = {
-  name: string;
-  hostname: string;
-  os: string;
-  status: "Online" | "Offline";
-  lastSeen: string;
-};
+  name: string
+  hostname: string
+  os: string
+  status: "Online" | "Offline"
+  lastSeen: string
+}
 
 const agents: Agent[] = [
   { name: "Sentinel-01", hostname: "sentinel-01.local", os: "Ubuntu 22.04", status: "Online", lastSeen: "5 minut temu" },
@@ -36,15 +51,7 @@ const agents: Agent[] = [
   { name: "Jump-Host", hostname: "jump-01.ops", os: "Rocky Linux 9", status: "Online", lastSeen: "8 minut temu" },
   { name: "CI-Runner-01", hostname: "ci-runner-01.ops", os: "Ubuntu 24.04", status: "Online", lastSeen: "2 minuty temu" },
   { name: "CI-Runner-02", hostname: "ci-runner-02.ops", os: "Ubuntu 24.04", status: "Offline", lastSeen: "6 godzin temu" },
-  { name: "Web-Front-01", hostname: "web-01.sentinelops", os: "Amazon Linux 2023", status: "Online", lastSeen: "16 minut temu" },
-  { name: "Web-Front-02", hostname: "web-02.sentinelops", os: "Amazon Linux 2023", status: "Offline", lastSeen: "1 godzinę temu" },
-  { name: "Cache-01", hostname: "cache-01.internal", os: "Debian 12", status: "Online", lastSeen: "11 minut temu" },
-  { name: "Cache-02", hostname: "cache-02.internal", os: "Debian 12", status: "Online", lastSeen: "9 minut temu" },
-  { name: "MQ-01", hostname: "mq-01.internal", os: "Ubuntu 22.04", status: "Offline", lastSeen: "3 godziny temu" },
-  { name: "Win-Collector", hostname: "win-collector.dc1", os: "Windows Server 2019", status: "Online", lastSeen: "33 minuty temu" },
-  { name: "Audit-Node", hostname: "audit-01.sentinelops", os: "Rocky Linux 8", status: "Offline", lastSeen: "7 godzin temu" },
-  { name: "DR-Backup", hostname: "dr-backup.sentinelops", os: "Ubuntu 20.04", status: "Online", lastSeen: "50 minut temu" },
-];
+]
 
 const statusStyles: Record<
   Agent["status"],
@@ -58,78 +65,152 @@ const statusStyles: Record<
     badge: "bg-red-500/15 text-red-400",
     text: "Offline",
   },
-};
+}
+
+/* =======================
+   COLUMNS
+======================= */
+
+const columns: ColumnDef<Agent>[] = [
+  {
+    accessorKey: "name",
+    header: "Nazwa agenta",
+    meta: { className: "" },
+    cell: ({ row }) => (
+      <span className="font-medium text-slate-100">
+        {row.getValue("name")}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "hostname",
+    header: "Nazwa hosta",
+    meta: { className: "hidden md:table-cell" },
+    cell: ({ row }) => row.getValue("hostname"),
+  },
+  {
+    accessorKey: "os",
+    header: "System operacyjny",
+    meta: { className: "hidden sm:table-cell" },
+    cell: ({ row }) => row.getValue("os"),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    meta: { className: "" },
+    cell: ({ row }) => {
+      const status = row.getValue<Agent["status"]>("status")
+      const styles = statusStyles[status]
+
+      return (
+        <Badge
+          variant="outline"
+          className={`border-0 px-3 py-1 text-xs font-semibold ${styles.badge}`}
+        >
+          {styles.text}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "lastSeen",
+    header: () => <div>Ostatnio widziany</div>,
+    meta: { className: "hidden sm:table-cell" },
+    cell: ({ row }) => row.getValue("lastSeen"),
+  },
+]
+
+/* =======================
+   COMPONENT
+======================= */
 
 export default function AgentsTable() {
+  const table = useReactTable({
+    data: agents,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 8,
+      },
+    },
+  })
+
   return (
-    <Card className="flex h-full min-h-0 flex-col border border-slate-800 bg-slate-900 text-slate-100">
-      <CardHeader className="border-b border-slate-800 px-6 py-4">
-        <CardTitle className="text-lg font-semibold text-slate-50">
-          Agenci
-        </CardTitle>
+    <Card>
+      <CardHeader className="border-b border-slate-800">
+        <CardTitle>Agenci</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex min-h-0 flex-1 p-0">
-        <div className="flex flex-1 min-h-0">
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-            <Table className="overflow-auto">
-              <TableHeader className="sticky top-0 z-10 bg-slate-900">
-                <TableRow className="border-b border-slate-800">
-                  <TableHead className="w-[200px] text-slate-300">
-                    Nazwa agenta
-                  </TableHead>
-                  <TableHead className="text-slate-300">
-                    Nazwa hosta
-                  </TableHead>
-                  <TableHead className="text-slate-300">
-                    System operacyjny
-                  </TableHead>
-                  <TableHead className="text-slate-300">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-right text-slate-300">
-                    Ostatnio widziany
-                  </TableHead>
+      <CardContent className="space-y-4">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
                 </TableRow>
-              </TableHeader>
+              ))}
+            </TableHeader>
 
-              <TableBody>
-                {agents.map((agent) => {
-                  const status = statusStyles[agent.status];
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    Brak danych
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-                  return (
-                    <TableRow
-                      key={agent.hostname}
-                      className="border-b border-slate-800/70 hover:bg-slate-800/60"
-                    >
-                      <TableCell className="font-medium text-slate-100">
-                        {agent.name}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {agent.hostname}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {agent.os}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`border-0 px-3 py-1 text-xs font-semibold ${status.badge}`}
-                        >
-                          {status.text}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right text-slate-400">
-                        {agent.lastSeen}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+        {/* PAGINACJA */}
+        <div className="flex items-center justify-end space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Poprzednia
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Następna
+          </Button>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
