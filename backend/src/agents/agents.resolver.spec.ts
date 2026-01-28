@@ -2,11 +2,11 @@ jest.mock('src/prisma/prisma.service', () => ({ PrismaService: jest.fn() }), {
   virtual: true,
 });
 import { Test, TestingModule } from '@nestjs/testing';
-import { DevicesResolver } from './devices.resolver';
-import { DevicesService } from './devices.service';
+import { AgentsResolver } from './agents.resolver';
+import { AgentsService } from './agents.service';
 
-describe('DevicesResolver', () => {
-  let resolver: DevicesResolver;
+describe('AgentsResolver', () => {
+  let resolver: AgentsResolver;
 
   beforeEach(async () => {
     const serviceMock = {
@@ -16,12 +16,12 @@ describe('DevicesResolver', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DevicesResolver,
-        { provide: DevicesService, useValue: serviceMock },
+        AgentsResolver,
+        { provide: AgentsService, useValue: serviceMock },
       ],
     }).compile();
 
-    resolver = module.get<DevicesResolver>(DevicesResolver);
+    resolver = module.get<AgentsResolver>(AgentsResolver);
   });
 
   it('should be defined', () => {

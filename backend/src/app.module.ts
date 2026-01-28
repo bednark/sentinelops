@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
-import { DevicesModule } from './devices/devices.module';
+import { AgentsModule } from './agents/agents.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -19,7 +19,7 @@ const isDev = process.env.NODE_ENV !== 'production';
     }),
     PrismaModule,
     UsersModule,
-    DevicesModule,
+    AgentsModule,
     MetricsModule,
     AlertsModule,
   ],

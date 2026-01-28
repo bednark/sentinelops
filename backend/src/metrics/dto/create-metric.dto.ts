@@ -32,7 +32,7 @@ class TimestampDto {
 
 export class CreateMetricDto {
   @IsString()
-  deviceId: string;
+  agentId: string;
 
   @IsEnum(MetricName)
   name: MetricName;

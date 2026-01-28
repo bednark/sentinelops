@@ -10,8 +10,8 @@ export class MetricsRestController {
     return this.metricsService.findAll();
   }
 
-  @Get(':deviceId')
-  getMetricsByDevice(@Param('deviceId') deviceId: string) {
-    return this.metricsService.findByDevice(deviceId);
+  @Get(':agentId')
+  getMetricsByAgent(@Param('agentId') agentId: string) {
+    return this.metricsService.findByAgent(agentId);
   }
 }

@@ -10,7 +10,7 @@ service MetricsIngestService {
 }
 
 message Metric {
-  string deviceId = 1;
+  string agentId = 1;
   MetricName name = 2;
   double value = 3;
   google.protobuf.Timestamp timestamp = 4;

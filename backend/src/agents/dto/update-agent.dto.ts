@@ -1,7 +1,7 @@
 import { IsEnum, IsString, IsOptional } from 'class-validator';
-import { DeviceStatus } from './create-device.dto';
+import { AgentStatus } from './create-agent.dto';
 
-export class UpdateDeviceDto {
+export class UpdateAgentDto {
   @IsString()
   @IsOptional()
   name: string;
@@ -18,7 +18,7 @@ export class UpdateDeviceDto {
   @IsOptional()
   agentToken: string;
 
-  @IsEnum(DeviceStatus)
+  @IsEnum(AgentStatus)
   @IsOptional()
-  status: DeviceStatus;
+  status: AgentStatus;
 }

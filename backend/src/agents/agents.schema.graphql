@@ -1,21 +1,21 @@
 scalar DateTime
 
-type Device {
+type Agent {
   id: ID!
   name: String!
   hostname: String!
   os: String!
-  status: DeviceStatus!
+  status: AgentStatus!
   lastSeen: DateTime
   createdAt: DateTime!
 }
 
-enum DeviceStatus {
+enum AgentStatus {
   ONLINE
   OFFLINE
 }
 
 type Query {
-  devices: [Device!]!
-  device(id: ID!): Device
+  agents: [Agent!]!
+  agent(id: ID!): Agent
 }

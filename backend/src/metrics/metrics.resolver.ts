@@ -6,15 +6,15 @@ export class MetricsResolver {
   constructor(private readonly metricsService: MetricsService) {}
 
   @Query('metrics')
-  async metrics(@Args('deviceId') deviceId?: string) {
-    if (deviceId) {
-      return this.metricsService.findByDevice(deviceId);
+  async metrics(@Args('agentId') agentId?: string) {
+    if (agentId) {
+      return this.metricsService.findByAgent(agentId);
     }
     return this.metricsService.findAll();
   }
 
-  @ResolveField('device')
-  async device(@Parent() metric: { deviceId: string }) {
-    return this.metricsService.findDevice(metric.deviceId);
+  @ResolveField('agent')
+  async agent(@Parent() metric: { agentId: string }) {
+    return this.metricsService.findAgent(metric.agentId);
   }
 }

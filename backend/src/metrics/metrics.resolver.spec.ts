@@ -8,8 +8,8 @@ describe('MetricsResolver', () => {
   beforeEach(async () => {
     const serviceMock = {
       findAll: jest.fn(),
-      findByDevice: jest.fn(),
-      findDevice: jest.fn(),
+      findByAgent: jest.fn(),
+      findAgent: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

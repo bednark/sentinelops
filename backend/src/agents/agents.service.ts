@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateDeviceDto } from './dto/create-device.dto';
-import { UpdateDeviceDto } from './dto/update-device.dto';
+import { CreateAgentDto } from './dto/create-agent.dto';
+import { UpdateAgentDto } from './dto/update-agent.dto';
 
 @Injectable()
-export class DevicesService {
+export class AgentsService {
   constructor(private prisma: PrismaService) {}
 
   findAll() {
@@ -29,11 +29,11 @@ export class DevicesService {
         }
       }
 
-      throw new InternalServerErrorException(`Failed to fetch device ${id}`);
+      throw new InternalServerErrorException(`Failed to fetch agent ${id}`);
     }
   }
 
-  async create(dto: CreateDeviceDto) {
+  async create(dto: CreateAgentDto) {
     try {
       await this.prisma.agent.create({
         data: {
@@ -47,14 +47,14 @@ export class DevicesService {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2002')
           throw new ConflictException(
-            `Device with agentToken '${dto.agentToken}' already exists`,
+            `Agent with agentToken '${dto.agentToken}' already exists`,
           );
 
       throw e;
     }
   }
 
-  async update(id: string, dto: UpdateDeviceDto) {
+  async update(id: string, dto: UpdateAgentDto) {
     const data: Prisma.AgentUpdateInput = {};
 
     if (dto.name) data.name = dto.name;
@@ -75,10 +75,10 @@ export class DevicesService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException(`Device with id '${id}' not found`);
+          throw new NotFoundException(`Agent with id '${id}' not found`);
         if (e.code === 'P2002')
           throw new ConflictException(
-            `Device with agentToken '${dto.agentToken}' already exists`,
+            `Agent with agentToken '${dto.agentToken}' already exists`,
           );
       }
       throw e;
@@ -93,7 +93,7 @@ export class DevicesService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
         if (e.code === 'P2025')
-          throw new NotFoundException(`Device with id '${id}' not found`);
+          throw new NotFoundException(`Agent with id '${id}' not found`);
 
       throw e;
     }

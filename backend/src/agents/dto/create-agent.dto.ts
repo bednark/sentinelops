@@ -1,11 +1,11 @@
 import { IsString } from 'class-validator';
 
-export enum DeviceStatus {
+export enum AgentStatus {
   ONLINE = 'ONLINE',
   OFFLINE = 'OFFLINE',
 }
 
-export class CreateDeviceDto {
+export class CreateAgentDto {
   @IsString()
   name: string;
 

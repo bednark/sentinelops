@@ -24,44 +24,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Agent } from "@/lib/types"
+
+interface IAgentsTableProps {
+  agents: Agent[];
+}
 
 /* =======================
    TYPES & DATA
 ======================= */
 
-type Agent = {
-  name: string
-  hostname: string
-  os: string
-  status: "Online" | "Offline"
-  lastSeen: string
-}
-
-const agents: Agent[] = [
-  { name: "Sentinel-01", hostname: "sentinel-01.local", os: "Ubuntu 22.04", status: "Online", lastSeen: "5 minut temu" },
-  { name: "Sentinel-02", hostname: "sentinel-02.local", os: "Rocky Linux 9", status: "Online", lastSeen: "12 minut temu" },
-  { name: "Edge-Gateway", hostname: "edge-gw.sentinelops", os: "Debian 12", status: "Offline", lastSeen: "25 minut temu" },
-  { name: "DB-Primary", hostname: "db-primary.internal", os: "Ubuntu 20.04", status: "Offline", lastSeen: "2 godziny temu" },
-  { name: "DB-Replica", hostname: "db-replica.internal", os: "Ubuntu 20.04", status: "Online", lastSeen: "35 minut temu" },
-  { name: "Analytics-Node", hostname: "analytics-01.sentinelops", os: "Amazon Linux 2023", status: "Online", lastSeen: "18 minut temu" },
-  { name: "Win-Agent", hostname: "win-agent.dc1", os: "Windows Server 2022", status: "Online", lastSeen: "45 minut temu" },
-  { name: "Core-Router", hostname: "core-rtr.dc1", os: "Debian 11", status: "Online", lastSeen: "3 minuty temu" },
-  { name: "Proxy-01", hostname: "proxy-01.sentinelops", os: "Ubuntu 22.04", status: "Offline", lastSeen: "4 godziny temu" },
-  { name: "Proxy-02", hostname: "proxy-02.sentinelops", os: "Ubuntu 22.04", status: "Online", lastSeen: "27 minut temu" },
-  { name: "Jump-Host", hostname: "jump-01.ops", os: "Rocky Linux 9", status: "Online", lastSeen: "8 minut temu" },
-  { name: "CI-Runner-01", hostname: "ci-runner-01.ops", os: "Ubuntu 24.04", status: "Online", lastSeen: "2 minuty temu" },
-  { name: "CI-Runner-02", hostname: "ci-runner-02.ops", os: "Ubuntu 24.04", status: "Offline", lastSeen: "6 godzin temu" },
-]
-
 const statusStyles: Record<
   Agent["status"],
   { badge: string; text: string }
 > = {
-  Online: {
+  ONLINE: {
     badge: "bg-green-500/15 text-green-400",
     text: "Online",
   },
-  Offline: {
+  OFFLINE: {
     badge: "bg-red-500/15 text-red-400",
     text: "Offline",
   },
@@ -124,7 +105,7 @@ const columns: ColumnDef<Agent>[] = [
    COMPONENT
 ======================= */
 
-export default function AgentsTable() {
+export default function AgentsTable({ agents }: IAgentsTableProps) {
   const table = useReactTable({
     data: agents,
     columns,

@@ -3,10 +3,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateMetricDto } from './dto/create-metric.dto';
 import { Prisma } from '../../generated/prisma/client';
 
-class DeviceNotFoundError extends Error {
-  constructor(deviceId?: string) {
-    super(deviceId ? `Device ${deviceId} not found` : 'Device not found');
-    this.name = 'DeviceNotFoundError';
+class AgentNotFoundError extends Error {
+  constructor(agentId?: string) {
+    super(agentId ? `Agent ${agentId} not found` : 'Agent not found');
+    this.name = 'AgentNotFoundError';
   }
 }
 
@@ -24,7 +24,7 @@ export class MetricsService {
     }
   }
 
-  async findByDevice(agentId: string) {
+  async findByAgent(agentId: string) {
     try {
       return await this.prisma.metric.findMany({
         where: { agentId },
@@ -32,15 +32,15 @@ export class MetricsService {
       });
     } catch {
       throw new InternalServerErrorException(
-        `Failed to fetch metrics for device ${agentId}`,
+        `Failed to fetch metrics for agent ${agentId}`,
       );
     }
   }
 
-  async findDevice(deviceId: string) {
+  async findAgent(agentId: string) {
     try {
-      const device = await this.prisma.agent.findUnique({
-        where: { id: deviceId },
+      const agent = await this.prisma.agent.findUnique({
+        where: { id: agentId },
         select: {
           id: true,
           name: true,
@@ -52,14 +52,14 @@ export class MetricsService {
         },
       });
 
-      if (!device) {
-        throw new Error('Device not found');
+      if (!agent) {
+        throw new Error('Agent not found');
       }
 
-      return device;
+      return agent;
     } catch {
       throw new InternalServerErrorException(
-        `Failed to resolve device ${deviceId}`,
+        `Failed to resolve agent ${agentId}`,
       );
     }
   }
@@ -68,7 +68,7 @@ export class MetricsService {
     try {
       const result = await this.prisma.metric.createMany({
         data: dto.map((m) => ({
-          agentId: m.deviceId,
+          agentId: m.agentId,
           name: m.name,
           value: m.value,
           timestamp: new Date(m.timestamp.seconds * 1000),
@@ -77,7 +77,7 @@ export class MetricsService {
       return result.count;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2003') throw new DeviceNotFoundError();
+        if (e.code === 'P2003') throw new AgentNotFoundError();
       throw e;
     }
   }

@@ -4,12 +4,12 @@ import { MetricsService } from './metrics.service';
 
 describe('MetricsRestController', () => {
   let controller: MetricsRestController;
-  let serviceMock: jest.Mocked<Pick<MetricsService, 'findAll' | 'findByDevice'>>;
+  let serviceMock: jest.Mocked<Pick<MetricsService, 'findAll' | 'findByAgent'>>;
 
   beforeEach(async () => {
     serviceMock = {
       findAll: jest.fn(),
-      findByDevice: jest.fn(),
+      findByAgent: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

@@ -5,7 +5,7 @@ type Metric {
   name: MetricName!
   value: Float!
   timestamp: DateTime!
-  device: Device!
+  agent: Agent!
 }
 
 enum MetricName {
@@ -19,5 +19,5 @@ enum MetricName {
 }
 
 type Query {
-  metrics(deviceId: ID): [Metric!]!
+  metrics(agentId: ID): [Metric!]!
 }

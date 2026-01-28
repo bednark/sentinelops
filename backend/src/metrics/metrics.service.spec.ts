@@ -9,7 +9,7 @@ describe('MetricsService', () => {
       findMany: jest.fn(),
       createMany: jest.fn(),
     },
-    device: {
+    agent: {
       findUnique: jest.fn(),
     },
   };

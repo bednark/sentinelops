@@ -25,8 +25,18 @@ describe('MetricsGrpcController', () => {
 
   it('calls service.create for streamed metrics', async () => {
     const chunk: CreateMetricDto[] = [
-      { deviceId: 'd', name: MetricName.CPU_USAGE, value: 1, timestamp: { seconds: 1 } },
-      { deviceId: 'd', name: MetricName.RAM_USAGE, value: 2, timestamp: { seconds: 2 } },
+      {
+        deviceId: 'd',
+        name: MetricName.CPU_USAGE,
+        value: 1,
+        timestamp: { seconds: 1 },
+      },
+      {
+        deviceId: 'd',
+        name: MetricName.RAM_USAGE,
+        value: 2,
+        timestamp: { seconds: 2 },
+      },
     ];
     serviceMock.create.mockResolvedValue(chunk.length);
 
