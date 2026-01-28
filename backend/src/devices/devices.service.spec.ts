@@ -13,9 +13,9 @@ import { DevicesService } from './devices.service';
 describe('DevicesService', () => {
   let service: DevicesService;
   let prisma: {
-    device: {
+    agent: {
       findMany: jest.Mock;
-      findUniqueOrThrow: jest.Mock;
+      findUnique: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
@@ -30,9 +30,9 @@ describe('DevicesService', () => {
 
   beforeEach(async () => {
     prisma = {
-      device: {
+      agent: {
         findMany: jest.fn(),
-        findUniqueOrThrow: jest.fn(),
+        findUnique: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
@@ -67,10 +67,10 @@ describe('DevicesService', () => {
           createdAt: new Date(),
         },
       ];
-      prisma.device.findMany.mockResolvedValue(devices);
+      prisma.agent.findMany.mockResolvedValue(devices);
 
       await expect(service.findAll()).resolves.toEqual(devices);
-      expect(prisma.device.findMany).toHaveBeenCalled();
+      expect(prisma.agent.findMany).toHaveBeenCalled();
     });
   });
 
@@ -86,22 +86,18 @@ describe('DevicesService', () => {
         lastSeen: null,
         createdAt: new Date(),
       };
-      prisma.device.findUniqueOrThrow.mockResolvedValue(device);
+      prisma.agent.findUnique.mockResolvedValue(device);
 
       await expect(service.findOne('123')).resolves.toEqual(device);
-      expect(prisma.device.findUniqueOrThrow).toHaveBeenCalledWith({
+      expect(prisma.agent.findUnique).toHaveBeenCalledWith({
         where: { id: '123' },
       });
     });
 
-    it('throws NotFoundException when device is missing', async () => {
-      prisma.device.findUniqueOrThrow.mockRejectedValue(
-        createPrismaError('P2025'),
-      );
+    it('returns null when device is missing', async () => {
+      prisma.agent.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('missing')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(service.findOne('missing')).resolves.toBeNull();
     });
   });
 
@@ -114,11 +110,11 @@ describe('DevicesService', () => {
     };
 
     it('stores a device', async () => {
-      prisma.device.create.mockResolvedValue(undefined);
+      prisma.agent.create.mockResolvedValue(undefined);
 
       await service.create(dto);
 
-      expect(prisma.device.create).toHaveBeenCalledWith({
+      expect(prisma.agent.create).toHaveBeenCalledWith({
         data: {
           name: dto.name,
           hostname: dto.hostname,
@@ -129,7 +125,7 @@ describe('DevicesService', () => {
     });
 
     it('throws ConflictException when agentToken already exists', async () => {
-      prisma.device.create.mockRejectedValue(createPrismaError('P2002'));
+      prisma.agent.create.mockRejectedValue(createPrismaError('P2002'));
 
       await expect(service.create(dto)).rejects.toBeInstanceOf(
         ConflictException,
@@ -146,11 +142,11 @@ describe('DevicesService', () => {
         agentToken: 'updated-token',
         status: DeviceStatus.ONLINE,
       };
-      prisma.device.update.mockResolvedValue(undefined);
+      prisma.agent.update.mockResolvedValue(undefined);
 
       await service.update('device-id', dto);
 
-      expect(prisma.device.update).toHaveBeenCalledWith({
+      expect(prisma.agent.update).toHaveBeenCalledWith({
         where: { id: 'device-id' },
         data: {
           name: dto.name,
@@ -163,7 +159,7 @@ describe('DevicesService', () => {
     });
 
     it('throws NotFoundException when device is missing', async () => {
-      prisma.device.update.mockRejectedValue(createPrismaError('P2025'));
+      prisma.agent.update.mockRejectedValue(createPrismaError('P2025'));
 
       await expect(
         service.update('missing', {
@@ -177,7 +173,7 @@ describe('DevicesService', () => {
     });
 
     it('throws ConflictException when agentToken is duplicated', async () => {
-      prisma.device.update.mockRejectedValue(createPrismaError('P2002'));
+      prisma.agent.update.mockRejectedValue(createPrismaError('P2002'));
 
       await expect(
         service.update('id', {
@@ -193,17 +189,17 @@ describe('DevicesService', () => {
 
   describe('delete', () => {
     it('deletes the device by id', async () => {
-      prisma.device.delete.mockResolvedValue(undefined);
+      prisma.agent.delete.mockResolvedValue(undefined);
 
       await service.delete('to-delete');
 
-      expect(prisma.device.delete).toHaveBeenCalledWith({
+      expect(prisma.agent.delete).toHaveBeenCalledWith({
         where: { id: 'to-delete' },
       });
     });
 
     it('throws NotFoundException when delete misses a record', async () => {
-      prisma.device.delete.mockRejectedValue(createPrismaError('P2025'));
+      prisma.agent.delete.mockRejectedValue(createPrismaError('P2025'));
 
       await expect(service.delete('missing')).rejects.toBeInstanceOf(
         NotFoundException,

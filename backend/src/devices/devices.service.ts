@@ -2,7 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -14,12 +14,12 @@ export class DevicesService {
   constructor(private prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.device.findMany();
+    return this.prisma.agent.findMany();
   }
 
   async findOne(id: string) {
     try {
-      return await this.prisma.device.findUnique({
+      return await this.prisma.agent.findUnique({
         where: { id },
       });
     } catch (e) {
@@ -29,15 +29,13 @@ export class DevicesService {
         }
       }
 
-      throw new InternalServerErrorException(
-        `Failed to fetch device ${id}`,
-      );
+      throw new InternalServerErrorException(`Failed to fetch device ${id}`);
     }
   }
 
   async create(dto: CreateDeviceDto) {
     try {
-      await this.prisma.device.create({
+      await this.prisma.agent.create({
         data: {
           name: dto.name,
           hostname: dto.hostname,
@@ -57,7 +55,7 @@ export class DevicesService {
   }
 
   async update(id: string, dto: UpdateDeviceDto) {
-    const data: Prisma.DeviceUpdateInput = {};
+    const data: Prisma.AgentUpdateInput = {};
 
     if (dto.name) data.name = dto.name;
 
@@ -70,7 +68,7 @@ export class DevicesService {
     if (dto.status) data.status = dto.status;
 
     try {
-      await this.prisma.device.update({
+      await this.prisma.agent.update({
         where: { id },
         data,
       });
@@ -89,7 +87,7 @@ export class DevicesService {
 
   async delete(id: string) {
     try {
-      await this.prisma.device.delete({
+      await this.prisma.agent.delete({
         where: { id },
       });
     } catch (e) {

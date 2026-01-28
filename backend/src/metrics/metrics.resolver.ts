@@ -1,10 +1,4 @@
-import {
-  Resolver,
-  Query,
-  ResolveField,
-  Parent,
-  Args,
-} from '@nestjs/graphql';
+import { Resolver, Query, ResolveField, Parent, Args } from '@nestjs/graphql';
 import { MetricsService } from './metrics.service';
 
 @Resolver('Metric')

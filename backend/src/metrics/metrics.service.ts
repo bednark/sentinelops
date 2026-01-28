@@ -19,27 +19,27 @@ export class MetricsService {
       return await this.prisma.metric.findMany({
         orderBy: { timestamp: 'desc' },
       });
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException('Failed to fetch metrics');
     }
   }
 
-  async findByDevice(deviceId: string) {
+  async findByDevice(agentId: string) {
     try {
       return await this.prisma.metric.findMany({
-        where: { deviceId },
+        where: { agentId },
         orderBy: { timestamp: 'desc' },
       });
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException(
-        `Failed to fetch metrics for device ${deviceId}`,
+        `Failed to fetch metrics for device ${agentId}`,
       );
     }
   }
 
   async findDevice(deviceId: string) {
     try {
-      const device = await this.prisma.device.findUnique({
+      const device = await this.prisma.agent.findUnique({
         where: { id: deviceId },
         select: {
           id: true,
@@ -57,7 +57,7 @@ export class MetricsService {
       }
 
       return device;
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException(
         `Failed to resolve device ${deviceId}`,
       );
@@ -68,7 +68,7 @@ export class MetricsService {
     try {
       const result = await this.prisma.metric.createMany({
         data: dto.map((m) => ({
-          deviceId: m.deviceId,
+          agentId: m.deviceId,
           name: m.name,
           value: m.value,
           timestamp: new Date(m.timestamp.seconds * 1000),
@@ -77,8 +77,7 @@ export class MetricsService {
       return result.count;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2003')
-          throw new DeviceNotFoundError();
+        if (e.code === 'P2003') throw new DeviceNotFoundError();
       throw e;
     }
   }

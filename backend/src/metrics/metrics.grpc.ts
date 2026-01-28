@@ -15,7 +15,9 @@ export class MetricsGrpcController {
     return stream$.pipe(
       bufferCount(BATCH_SIZE),
       concatMap((chunk) => {
-        return from(this.metricsService.create(chunk)).pipe(map(() => chunk.length))
+        return from(this.metricsService.create(chunk)).pipe(
+          map(() => chunk.length),
+        );
       }),
       reduce((acc, n) => acc + n, 0),
       map((total) => ({ success: true, receivedCount: total })),

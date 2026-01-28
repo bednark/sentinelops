@@ -22,13 +22,13 @@ enum Role {
   VIEWER
 }
 
-model Device {
+model Agent {
   id          String        @id @default(uuid())
   name        String
   hostname    String
   os          String
   agentToken  String        @unique
-  status      DeviceStatus  @default(OFFLINE)
+  status      AgentStatus  @default(OFFLINE)
   lastSeen    DateTime?
   createdAt   DateTime      @default(now())
 
@@ -36,20 +36,20 @@ model Device {
   alerts      Alert[]
 }
 
-enum DeviceStatus {
+enum AgentStatus {
   ONLINE
   OFFLINE
 }
 
 model Metric   {
   id        BigInt      @id @default(autoincrement())
-  deviceId  String
+  agentId  String
   name      MetricName
   value     Float
   timestamp DateTime
 
-  device    Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  @@index([deviceId, timestamp(sort: Desc)])
+  agent    Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  @@index([agentId, timestamp(sort: Desc)])
 }
 
 enum MetricName {
@@ -64,14 +64,14 @@ enum MetricName {
 
 model Alert {
   id            String        @id @default(ulid())
-  deviceId      String
+  agentId      String
   metric        MetricName
   threshold     Float
   severity      AlertSeverity
   acknowledged  Boolean       @default(false)
   createdAt     DateTime      @default(now())
 
-  device        Device        @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  agent        Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
 }
 
 enum AlertSeverity {
