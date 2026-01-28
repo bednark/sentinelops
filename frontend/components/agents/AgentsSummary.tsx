@@ -3,7 +3,7 @@ import { Server, CheckCircle, XCircle } from "lucide-react"
 
 type SummaryCardProps = {
   title: string
-  value: number
+  value: number | string
   accent?: "default" | "success" | "danger"
 }
 
@@ -53,10 +53,16 @@ function SummaryCard({
   )
 }
 
-export default function AgentsSummary() {
-  const total = 21
-  const online = 14
-  const offline = total - online
+interface IAgentsSummaryProps {
+  stats: {
+    total: number | string
+    online: number | string
+    offline: number | string
+  }
+}
+
+export default function AgentsSummary({ stats }: IAgentsSummaryProps) {
+  const { total, online, offline }  = stats
 
   return (
     <div

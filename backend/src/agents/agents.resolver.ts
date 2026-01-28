@@ -14,4 +14,9 @@ export class AgentsResolver {
   agent(@Args('id') id: string) {
     return this.agentsService.findOne(id);
   }
+
+  @Query('agentsStats')
+  agentsStats() {
+    return this.agentsService.agentsStats();
+  }
 }

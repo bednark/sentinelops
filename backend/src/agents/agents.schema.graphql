@@ -15,7 +15,14 @@ enum AgentStatus {
   OFFLINE
 }
 
+type AgentsStats {
+  total: Int!
+  online: Int!
+  offline: Int!
+}
+
 type Query {
   agents: [Agent!]!
   agent(id: ID!): Agent
+  agentsStats: AgentsStats!
 }

@@ -4,10 +4,16 @@ import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Prisma } from '../../generated/prisma/client';
+import { Prisma, AgentStatus } from '../../generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
+
+type AgentsStats = {
+  total: number
+  online: number
+  offline: number
+}
 
 @Injectable()
 export class AgentsService {
@@ -98,4 +104,31 @@ export class AgentsService {
       throw e;
     }
   }
+
+async agentsStats(): Promise<AgentsStats> {
+  const grouped = await this.prisma.agent.groupBy({
+    by: ['status'],
+    _count: {
+      _all: true,
+    },
+  })
+
+  let online = 0
+  let offline = 0
+
+  for (const row of grouped) {
+    if (row.status === AgentStatus.ONLINE) {
+      online = row._count._all
+    }
+    if (row.status === AgentStatus.OFFLINE) {
+      offline = row._count._all
+    }
+  }
+
+  return {
+    total: online + offline,
+    online,
+    offline,
+  }
+}
 }
