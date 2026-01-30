@@ -14,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -25,32 +24,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Agent } from "@/lib/types"
+import { statusStyles } from "@/lib/data"
+import AgentStatus from "./AgentStatus"
+import { formatRelativeTime } from "@/lib/functions"
 
 interface IAgentsTableProps {
   agents: Agent[];
 }
-
-/* =======================
-   TYPES & DATA
-======================= */
-
-const statusStyles: Record<
-  Agent["status"],
-  { badge: string; text: string }
-> = {
-  ONLINE: {
-    badge: "bg-green-500/15 text-green-400",
-    text: "Online",
-  },
-  OFFLINE: {
-    badge: "bg-red-500/15 text-red-400",
-    text: "Offline",
-  },
-}
-
-/* =======================
-   COLUMNS
-======================= */
 
 const columns: ColumnDef<Agent>[] = [
   {
@@ -84,12 +64,7 @@ const columns: ColumnDef<Agent>[] = [
       const styles = statusStyles[status]
 
       return (
-        <Badge
-          variant="outline"
-          className={`border-0 px-3 py-1 text-xs font-semibold ${styles.badge}`}
-        >
-          {styles.text}
-        </Badge>
+        <AgentStatus styles={styles} />
       )
     },
   },
@@ -97,13 +72,9 @@ const columns: ColumnDef<Agent>[] = [
     accessorKey: "lastSeen",
     header: () => <div>Ostatnio widziany</div>,
     meta: { className: "hidden sm:table-cell" },
-    cell: ({ row }) => row.getValue("lastSeen"),
+    cell: ({ row }) => row.getValue("lastSeen") ? formatRelativeTime(row.getValue("lastSeen")) : "Nigdy",
   },
 ]
-
-/* =======================
-   COMPONENT
-======================= */
 
 export default function AgentsTable({ agents }: IAgentsTableProps) {
   const table = useReactTable({
@@ -172,7 +143,6 @@ export default function AgentsTable({ agents }: IAgentsTableProps) {
           </Table>
         </div>
 
-        {/* PAGINACJA */}
         <div className="flex items-center justify-end space-x-2">
           <Button
             variant="outline"

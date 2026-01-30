@@ -88,7 +88,7 @@ func (MetricName) EnumDescriptor() ([]byte, []int) {
 
 type Metric struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId      string                 `protobuf:"bytes,1,opt,name=deviceId,proto3" json:"deviceId,omitempty"`
+	AgentId       string                 `protobuf:"bytes,1,opt,name=agentId,proto3" json:"agentId,omitempty"`
 	Name          MetricName             `protobuf:"varint,2,opt,name=name,proto3,enum=metrics.MetricName" json:"name,omitempty"`
 	Value         float64                `protobuf:"fixed64,3,opt,name=value,proto3" json:"value,omitempty"`
 	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
@@ -126,9 +126,9 @@ func (*Metric) Descriptor() ([]byte, []int) {
 	return file_metrics_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Metric) GetDeviceId() string {
+func (x *Metric) GetAgentId() string {
 	if x != nil {
-		return x.DeviceId
+		return x.AgentId
 	}
 	return ""
 }
@@ -210,9 +210,9 @@ var File_metrics_proto protoreflect.FileDescriptor
 
 const file_metrics_proto_rawDesc = "" +
 	"\n" +
-	"\rmetrics.proto\x12\ametrics\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9d\x01\n" +
-	"\x06Metric\x12\x1a\n" +
-	"\bdeviceId\x18\x01 \x01(\tR\bdeviceId\x12'\n" +
+	"\rmetrics.proto\x12\ametrics\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9b\x01\n" +
+	"\x06Metric\x12\x18\n" +
+	"\aagentId\x18\x01 \x01(\tR\aagentId\x12'\n" +
 	"\x04name\x18\x02 \x01(\x0e2\x13.metrics.MetricNameR\x04name\x12\x14\n" +
 	"\x05value\x18\x03 \x01(\x01R\x05value\x128\n" +
 	"\ttimestamp\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"W\n" +

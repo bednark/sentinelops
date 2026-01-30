@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMetricDto } from './dto/create-metric.dto';
-import { Prisma } from '../../generated/prisma/client';
+import { Prisma, MetricName } from '../../generated/prisma/client';
 
 class AgentNotFoundError extends Error {
   constructor(agentId?: string) {
@@ -14,9 +14,17 @@ class AgentNotFoundError extends Error {
 export class MetricsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(metricName: MetricName) {
+    const since = new Date(Date.now() - 6 * 60 * 60 * 1000);
+
     try {
       return await this.prisma.metric.findMany({
+        where: {
+          name: metricName,
+          timestamp: {
+            gte: since,
+          },
+        },
         orderBy: { timestamp: 'desc' },
       });
     } catch {
@@ -24,11 +32,19 @@ export class MetricsService {
     }
   }
 
-  async findByAgent(agentId: string) {
+  async findByAgent(metricName: MetricName, agentId: string) {
+    const since = new Date(Date.now() - 30 * 60 * 1000);
+
     try {
       return await this.prisma.metric.findMany({
-        where: { agentId },
-        orderBy: { timestamp: 'desc' },
+        where: {
+          agentId,
+          name: metricName,
+          timestamp: {
+            gte: since,
+          },
+        },
+        orderBy: { timestamp: 'asc' },
       });
     } catch {
       throw new InternalServerErrorException(
@@ -65,19 +81,36 @@ export class MetricsService {
   }
 
   async create(dto: CreateMetricDto[]) {
+    if (dto.length === 0) return 0;
+
+    const agentId = dto[0].agentId;
+    const now = new Date();
+
     try {
-      const result = await this.prisma.metric.createMany({
-        data: dto.map((m) => ({
-          agentId: m.agentId,
-          name: m.name,
-          value: m.value,
-          timestamp: new Date(m.timestamp.seconds * 1000),
-        })),
-      });
-      return result.count;
+      const result = await this.prisma.$transaction([
+        this.prisma.metric.createMany({
+          data: dto.map((m) => ({
+            agentId: m.agentId,
+            name: m.name,
+            value: m.value,
+            timestamp: new Date(m.timestamp.seconds * 1000),
+          })),
+        }),
+
+        this.prisma.agent.update({
+          where: { id: agentId },
+          data: { lastSeen: now },
+        }),
+      ]);
+
+      return result[0].count;
+
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError)
-        if (e.code === 'P2003') throw new AgentNotFoundError();
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2003') {
+          throw new AgentNotFoundError();
+        }
+      }
       throw e;
     }
   }

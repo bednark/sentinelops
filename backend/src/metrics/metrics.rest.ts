@@ -5,13 +5,13 @@ import { MetricsService } from './metrics.service';
 export class MetricsRestController {
   constructor(private readonly metricsService: MetricsService) {}
 
-  @Get()
-  getMetrics() {
-    return this.metricsService.findAll();
-  }
+  // @Get()
+  // getMetrics() {
+  //   return this.metricsService.findAll();
+  // }
 
-  @Get(':agentId')
-  getMetricsByAgent(@Param('agentId') agentId: string) {
-    return this.metricsService.findByAgent(agentId);
-  }
+  // @Get(':agentId')
+  // getMetricsByAgent(@Param('agentId') agentId: string) {
+  //   return this.metricsService.findByAgent(agentId);
+  // }
 }

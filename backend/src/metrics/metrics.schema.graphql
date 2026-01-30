@@ -19,5 +19,5 @@ enum MetricName {
 }
 
 type Query {
-  metrics(agentId: ID): [Metric!]!
+  metrics(metricName: MetricName!, agentId: ID): [Metric!]!
 }

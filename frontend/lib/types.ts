@@ -7,3 +7,14 @@ export type Agent = {
   status: AgentStatus;
   lastSeen: string;
 };
+
+export type AgentSelect = {
+  id: string;
+  name: string;
+  status: AgentStatus;
+}
+
+export type Metric = {
+  value: number
+  timestamp: string
+}

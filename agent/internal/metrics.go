@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"math"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -12,42 +13,51 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func CollectMetrics(deviceID string) ([]*metrics.Metric, error) {
-	now := timestamppb.New(time.Now())
+var prevDiskRead uint64
+var prevDiskWrite uint64
+var prevNetRx uint64
+var prevNetTx uint64
+var prevTime time.Time
+
+func round1(v float64) float64 {
+	return math.Round(v*10) / 10
+}
+
+func CollectMetrics(agentID string) ([]*metrics.Metric, error) {
+	nowTime := time.Now()
+	now := timestamppb.New(nowTime)
+
 	var result []*metrics.Metric
 
-	cpuPercents, err := cpu.Percent(0, false)
-	if err == nil && len(cpuPercents) > 0 {
+	if cpuPercents, err := cpu.Percent(0, false); err == nil && len(cpuPercents) > 0 {
 		result = append(result, &metrics.Metric{
-			DeviceId:  deviceID,
+			AgentId:   agentID,
 			Name:      metrics.MetricName_CPU_USAGE,
-			Value:     cpuPercents[0],
+			Value:     round1(cpuPercents[0]),
 			Timestamp: now,
 		})
 	}
 
-	vm, err := mem.VirtualMemory()
-	if err == nil {
+	if vm, err := mem.VirtualMemory(); err == nil {
 		result = append(result, &metrics.Metric{
-			DeviceId:  deviceID,
+			AgentId:   agentID,
 			Name:      metrics.MetricName_RAM_USAGE,
-			Value:     vm.UsedPercent,
+			Value:     round1(vm.UsedPercent),
 			Timestamp: now,
 		})
 	}
 
-	du, err := disk.Usage("/")
-	if err == nil {
+	if du, err := disk.Usage("/"); err == nil {
 		result = append(result, &metrics.Metric{
-			DeviceId:  deviceID,
+			AgentId:   agentID,
 			Name:      metrics.MetricName_DISK_USAGE,
-			Value:     du.UsedPercent,
+			Value:     round1(du.UsedPercent),
 			Timestamp: now,
 		})
 	}
 
-	ioCounters, err := disk.IOCounters()
-	if err == nil {
+	if ioCounters, err := disk.IOCounters(); err == nil {
+
 		var readBytes uint64
 		var writeBytes uint64
 
@@ -56,39 +66,70 @@ func CollectMetrics(deviceID string) ([]*metrics.Metric, error) {
 			writeBytes += stat.WriteBytes
 		}
 
-		result = append(result,
-			&metrics.Metric{
-				DeviceId:  deviceID,
-				Name:      metrics.MetricName_DISK_READ,
-				Value:     float64(readBytes),
-				Timestamp: now,
-			},
-			&metrics.Metric{
-				DeviceId:  deviceID,
-				Name:      metrics.MetricName_DISK_WRITE,
-				Value:     float64(writeBytes),
-				Timestamp: now,
-			},
-		)
+		if !prevTime.IsZero() {
+			dt := nowTime.Sub(prevTime).Seconds()
+
+			if dt > 0 && readBytes >= prevDiskRead && writeBytes >= prevDiskWrite {
+
+				readMBps := float64(readBytes-prevDiskRead) / dt / 1024 / 1024
+				writeMBps := float64(writeBytes-prevDiskWrite) / dt / 1024 / 1024
+
+				result = append(result,
+					&metrics.Metric{
+						AgentId:   agentID,
+						Name:      metrics.MetricName_DISK_READ,
+						Value:     round1(readMBps),
+						Timestamp: now,
+					},
+					&metrics.Metric{
+						AgentId:   agentID,
+						Name:      metrics.MetricName_DISK_WRITE,
+						Value:     round1(writeMBps),
+						Timestamp: now,
+					},
+				)
+			}
+		}
+
+		prevDiskRead = readBytes
+		prevDiskWrite = writeBytes
 	}
 
-	netIO, err := net.IOCounters(false)
-	if err == nil && len(netIO) > 0 {
-		result = append(result,
-			&metrics.Metric{
-				DeviceId:  deviceID,
-				Name:      metrics.MetricName_NET_RX,
-				Value:     float64(netIO[0].BytesRecv),
-				Timestamp: now,
-			},
-			&metrics.Metric{
-				DeviceId:  deviceID,
-				Name:      metrics.MetricName_NET_TX,
-				Value:     float64(netIO[0].BytesSent),
-				Timestamp: now,
-			},
-		)
+	if netIO, err := net.IOCounters(false); err == nil && len(netIO) > 0 {
+
+		rx := netIO[0].BytesRecv
+		tx := netIO[0].BytesSent
+
+		if !prevTime.IsZero() {
+			dt := nowTime.Sub(prevTime).Seconds()
+
+			if dt > 0 && rx >= prevNetRx && tx >= prevNetTx {
+
+				rxMbps := float64(rx-prevNetRx) * 8 / dt / 1_000_000
+				txMbps := float64(tx-prevNetTx) * 8 / dt / 1_000_000
+
+				result = append(result,
+					&metrics.Metric{
+						AgentId:   agentID,
+						Name:      metrics.MetricName_NET_RX,
+						Value:     round1(rxMbps),
+						Timestamp: now,
+					},
+					&metrics.Metric{
+						AgentId:   agentID,
+						Name:      metrics.MetricName_NET_TX,
+						Value:     round1(txMbps),
+						Timestamp: now,
+					},
+				)
+			}
+		}
+
+		prevNetRx = rx
+		prevNetTx = tx
 	}
+
+	prevTime = nowTime
 
 	return result, nil
 }
