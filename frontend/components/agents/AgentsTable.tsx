@@ -28,10 +28,26 @@ import { statusStyles } from "@/lib/data";
 import AgentStatus from "./AgentStatus";
 import { formatRelativeTime } from "@/lib/functions";
 import { useRouter } from "next/navigation";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
+import { useEffect } from "react";
 
-interface IAgentsTableProps {
+const AGENTS_QUERY = gql`
+  query Agents {
+    agents {
+      id
+      name
+      hostname
+      os
+      status
+      lastSeen
+    }
+  }
+`;
+
+type AgentsQueryResponse = {
   agents: Agent[];
-}
+};
 
 const columns: ColumnDef<Agent>[] = [
   {
@@ -77,7 +93,21 @@ const columns: ColumnDef<Agent>[] = [
   },
 ]
 
-export default function AgentsTable({ agents }: IAgentsTableProps) {
+export default function AgentsTable() {
+  const { data, startPolling, stopPolling } = useQuery<AgentsQueryResponse>(AGENTS_QUERY, {
+    fetchPolicy: "network-only",
+    notifyOnNetworkStatusChange: true,
+  });
+
+  const router = useRouter();
+
+  useEffect(() => {
+    startPolling(20000);
+    return () => stopPolling();
+  }, [startPolling]);
+
+  let agents: Agent[] = data?.agents ?? [];
+
   const table = useReactTable({
     data: agents,
     columns,
@@ -89,8 +119,6 @@ export default function AgentsTable({ agents }: IAgentsTableProps) {
       },
     },
   });
-
-  const router = useRouter();
 
   return (
     <Card>

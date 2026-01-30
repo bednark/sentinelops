@@ -1,5 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Server, CheckCircle, XCircle } from "lucide-react"
+"use client";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
+import { Server, CheckCircle, XCircle } from "lucide-react";
+import { useEffect } from "react";
 
 type SummaryCardProps = {
   title: string
@@ -61,7 +66,40 @@ interface IAgentsSummaryProps {
   }
 }
 
-export default function AgentsSummary({ stats }: IAgentsSummaryProps) {
+const AGENTS_QUERY = gql`
+  query AgentsSummary {
+      agentsStats {
+      total
+      online
+      offline
+    }
+  }
+`;
+
+type AgentsStatsQueryResponse = {
+  agentsStats: {
+    total: number;
+    online: number;
+    offline: number;
+  };
+};
+
+export default function AgentsSummary() {
+  const { data, startPolling, stopPolling } = useQuery<AgentsStatsQueryResponse>(AGENTS_QUERY, {
+    fetchPolicy: "network-only",
+    notifyOnNetworkStatusChange: true,
+  });
+
+  useEffect(() => {
+    startPolling(20000);
+    return () => stopPolling();
+  }, [startPolling]);
+
+  const stats = {
+    total: data?.agentsStats?.total ?? 'N/A',
+    online: data?.agentsStats?.online ?? 'N/A',
+    offline: data?.agentsStats?.offline ?? 'N/A',
+  }
   const { total, online, offline }  = stats
 
   return (
