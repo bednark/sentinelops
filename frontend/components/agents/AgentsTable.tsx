@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   ColumnDef,
@@ -6,15 +6,15 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -22,11 +22,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Agent } from "@/lib/types"
-import { statusStyles } from "@/lib/data"
-import AgentStatus from "./AgentStatus"
-import { formatRelativeTime } from "@/lib/functions"
+} from "@/components/ui/table";
+import { Agent } from "@/lib/types";
+import { statusStyles } from "@/lib/data";
+import AgentStatus from "./AgentStatus";
+import { formatRelativeTime } from "@/lib/functions";
+import { useRouter } from "next/navigation";
 
 interface IAgentsTableProps {
   agents: Agent[];
@@ -87,7 +88,9 @@ export default function AgentsTable({ agents }: IAgentsTableProps) {
         pageSize: 8,
       },
     },
-  })
+  });
+
+  const router = useRouter();
 
   return (
     <Card>
@@ -118,7 +121,7 @@ export default function AgentsTable({ agents }: IAgentsTableProps) {
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
+                  <TableRow key={row.id} onClick={() => router.push(`/agent/${row.original.id}`)} className="cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(

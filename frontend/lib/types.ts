@@ -1,6 +1,7 @@
 type AgentStatus = "ONLINE" | "OFFLINE";
 
 export type Agent = {
+  id: string;
   name: string;
   hostname: string;
   os: string;

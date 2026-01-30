@@ -42,6 +42,7 @@ export default async function AgentPage({
   const agents: AgentSelect[] = data?.agents ?? [];
 
   let agent: Agent = {
+    id: "",
     name: "",
     hostname: "",
     os: "",

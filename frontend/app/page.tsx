@@ -17,6 +17,7 @@ export default async function DashboardPage() {
     query: gql`
       query {
         agents {
+          id
           name
           hostname
           os
