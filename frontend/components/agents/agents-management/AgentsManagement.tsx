@@ -42,12 +42,12 @@ export default function AgentManagementPage() {
     currentName?: string;
   }>({ open: false });
 
-const [rotateDialog, setRotateDialog] = useState<{
-  step: "confirm" | "token" | null;
-  agentId?: string;
-  agentName?: string;
-  token?: string;
-}>({ step: null });
+  const [rotateDialog, setRotateDialog] = useState<{
+    step: "confirm" | "token" | null;
+    agentId?: string;
+    agentName?: string;
+    token?: string;
+  }>({ step: null });
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -55,22 +55,34 @@ const [rotateDialog, setRotateDialog] = useState<{
     agentName?: string;
   }>({ open: false });
 
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+
   const handleDelete = async (agentId: string) => {
   };
 
-const handleRotateToken = async (agentId: string) => {
-  setRotateDialog((prev) => {
-    if (!prev.agentId) return prev;
+  const handleRotateToken = async (agentId: string) => {
+    setRotateDialog((prev) => {
+      if (!prev.agentId) return prev;
 
-    return {
-      ...prev,
-      step: "token",
-      token: "nowytoken123",
-    };
-  });
-};
+      return {
+        ...prev,
+        step: "token",
+        token: "nowytoken123",
+      };
+    });
+  };
 
   const handleRename = async (agentId: string) => {
+  };
+
+  const [addError, setAddError] = useState("");
+
+  const handleAddAgent = async (agentName: string) => {
+    setAddDialogOpen(false);
+    setRotateDialog({
+      step: "token",
+      token: "nowytoken123",
+    });
   };
 
   if (loading) {
@@ -85,7 +97,13 @@ const handleRotateToken = async (agentId: string) => {
 
   return (
     <div className="p-8">
-      <AgentsManagementHeader />
+      <AgentsManagementHeader
+        open={addDialogOpen}
+        addError={addError}
+        onOpen={() => setAddDialogOpen(true)}
+        onClose={() => setAddDialogOpen(false)}
+        onSubmit={handleAddAgent}
+      />
       <AgentsManagementTable
         agents={agents}
         onRename={(agent) =>

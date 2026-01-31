@@ -4,44 +4,75 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function AgentsManagementHeader() {
+type AgentsManagementHeaderProps = {
+  open: boolean;
+  addError?: string;
+
+  onSubmit: (agentName: string) => Promise<void>;
+  onOpen: () => void;
+  onClose: () => void;
+};
+
+export default function AgentsManagementHeader({
+  open,
+  addError,
+  onSubmit,
+  onOpen,
+  onClose,
+}: AgentsManagementHeaderProps) {
   const [newAgentName, setNewAgentName] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [addError, setAddError] = useState('');
-  const handleAddAgent = async () => {
+
+  // reset input when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setNewAgentName("");
+    }
+  }, [open]);
+
+  const handleSubmit = async () => {
+    if (!newAgentName.trim()) return;
+    await onSubmit(newAgentName.trim());
   };
 
   return (
     <div className="mb-8 flex items-center justify-between">
       <div>
-        <h1 className="text-3xl text-slate-100 mb-2">Zarządzanie agentami</h1>
+        <h1 className="text-3xl text-slate-100 mb-2">
+          Zarządzanie agentami
+        </h1>
         <p className="text-slate-400">
           Zarządzaj agentami swojej infrastruktury
         </p>
       </div>
 
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogTrigger asChild>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Dodaj agenta
-          </Button>
-        </DialogTrigger>
+      {/* OPEN BUTTON */}
+      <Button
+        className="bg-blue-600 hover:bg-blue-700"
+        onClick={onOpen}
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Dodaj agenta
+      </Button>
+
+      {/* DIALOG */}
+      <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
         <DialogContent className="bg-slate-900 border-slate-800 text-slate-100">
           <DialogHeader>
-            <DialogTitle className="text-slate-100">Add New Agent</DialogTitle>
+            <DialogTitle className="text-slate-100">
+              Dodaj nowego agenta
+            </DialogTitle>
             <DialogDescription className="text-slate-400">
               Dodaj nowego agenta do monitorowania. Token zostanie wygenerowany automatycznie.
             </DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label htmlFor="agent-name" className="text-slate-200">
@@ -54,23 +85,38 @@ export default function AgentsManagementHeader() {
                 placeholder="web-server-01"
                 className="bg-slate-800 border-slate-700 text-slate-100"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddAgent();
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
                 }}
               />
             </div>
+
             {addError && (
               <p className="text-sm text-red-400">{addError}</p>
             )}
-            <Button
-              onClick={handleAddAgent}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-              disabled={!newAgentName.trim()}
-            >
-              Dodaj agenta
-            </Button>
+
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="ghost"
+                className="text-slate-400"
+                onClick={onClose}
+              >
+                Anuluj
+              </Button>
+
+              <Button
+                onClick={handleSubmit}
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={!newAgentName.trim()}
+              >
+                Dodaj agenta
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

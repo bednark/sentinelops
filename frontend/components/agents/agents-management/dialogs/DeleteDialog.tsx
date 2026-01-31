@@ -9,7 +9,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AlertTriangle } from "lucide-react";
-import { useState } from "react";
 
 type DeleteAgentDialogProps = {
   open: boolean;
