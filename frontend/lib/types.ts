@@ -19,3 +19,9 @@ export type Metric = {
   value: number
   timestamp: string
 }
+
+export type AgentManagment = {
+  id: string;
+  name: string;
+  createdAt: string;
+}

@@ -24,12 +24,12 @@ const navItems = [
     children: [
       {
         label: "Zarządzanie użytkownikami",
-        href: "/administracja/uzytkownicy",
+        href: "/administracja/zarzadzanie-uzytkownikami",
         icon: Users,
       },
       {
         label: "Zarządzanie agentami",
-        href: "/administracja/agenci",
+        href: "/administracja/zarzadzanie-agentami",
         icon: Server,
       },
     ],
@@ -60,7 +60,6 @@ export default function AppSidebar({ open, onClose }: AppSidebarProps) {
         "lg:translate-x-0"
       )}
     >
-      {/* LOGO / HEADER (desktop + mobile) */}
       <div className="flex h-16 items-center gap-2 px-6 text-white">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10">
           <Shield className="h-5 w-5 text-sky-400" />
@@ -70,7 +69,6 @@ export default function AppSidebar({ open, onClose }: AppSidebarProps) {
         </span>
       </div>
 
-      {/* NAV */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="space-y-1">
           {navItems.map((item) => {
@@ -156,7 +154,6 @@ export default function AppSidebar({ open, onClose }: AppSidebarProps) {
         </ul>
       </nav>
 
-      {/* USER CONTEXT */}
       <div className="border-t border-slate-800 p-4 space-y-3">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800">
