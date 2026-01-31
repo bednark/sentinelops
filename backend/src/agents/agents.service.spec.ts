@@ -1,41 +1,86 @@
 jest.mock('src/prisma/prisma.service', () => ({ PrismaService: jest.fn() }), {
   virtual: true,
 });
+
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Prisma } from '../../generated/prisma/client';
 import type { PrismaService as PrismaServiceType } from '../prisma/prisma.service';
 import { PrismaService as PrismaServiceToken } from 'src/prisma/prisma.service';
-import { CreateAgentDto, AgentStatus } from './dto/create-agent.dto';
-import { UpdateAgentDto } from './dto/update-agent.dto';
 import { AgentsService } from './agents.service';
+import { CreateAgentDto } from './dto/create-agent.dto';
+import {
+  UpdateAgentNameDto,
+  UpdateAgentStatusDto,
+} from './dto/update-agent.dto';
+import { AgentStatus, type Agent } from '../../generated/prisma/client';
 
 describe('AgentsService', () => {
   let service: AgentsService;
-  let prisma: {
-    agent: {
-      findMany: jest.Mock;
-      findUnique: jest.Mock;
-      create: jest.Mock;
-      update: jest.Mock;
-      delete: jest.Mock;
-    };
+  type AgentDelegate = PrismaServiceType['agent'];
+  type AgentDelegateMock = {
+    findMany: jest.Mock<
+      ReturnType<AgentDelegate['findMany']>,
+      Parameters<AgentDelegate['findMany']>
+    >;
+    findUnique: jest.Mock<
+      ReturnType<AgentDelegate['findUnique']>,
+      Parameters<AgentDelegate['findUnique']>
+    >;
+    create: jest.Mock<
+      ReturnType<AgentDelegate['create']>,
+      Parameters<AgentDelegate['create']>
+    >;
+    update: jest.Mock<
+      ReturnType<AgentDelegate['update']>,
+      Parameters<AgentDelegate['update']>
+    >;
+    delete: jest.Mock<
+      ReturnType<AgentDelegate['delete']>,
+      Parameters<AgentDelegate['delete']>
+    >;
+    groupBy: jest.Mock<
+      ReturnType<AgentDelegate['groupBy']>,
+      Parameters<AgentDelegate['groupBy']>
+    >;
   };
 
-  const createPrismaError = (code: string) =>
+  let prisma: { agent: AgentDelegateMock };
+
+  const createPrismaError = (code: string, meta?: Record<string, unknown>) =>
     new Prisma.PrismaClientKnownRequestError('error', {
       code,
-      clientVersion: '7.2.0',
+      clientVersion: '7.0.0',
+      meta,
     });
 
   beforeEach(async () => {
     prisma = {
       agent: {
-        findMany: jest.fn(),
-        findUnique: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
+        findMany: jest.fn<
+          ReturnType<AgentDelegate['findMany']>,
+          Parameters<AgentDelegate['findMany']>
+        >(),
+        findUnique: jest.fn<
+          ReturnType<AgentDelegate['findUnique']>,
+          Parameters<AgentDelegate['findUnique']>
+        >(),
+        create: jest.fn<
+          ReturnType<AgentDelegate['create']>,
+          Parameters<AgentDelegate['create']>
+        >(),
+        update: jest.fn<
+          ReturnType<AgentDelegate['update']>,
+          Parameters<AgentDelegate['update']>
+        >(),
+        delete: jest.fn<
+          ReturnType<AgentDelegate['delete']>,
+          Parameters<AgentDelegate['delete']>
+        >(),
+        groupBy: jest.fn<
+          ReturnType<AgentDelegate['groupBy']>,
+          Parameters<AgentDelegate['groupBy']>
+        >(),
       },
     };
 
@@ -54,78 +99,85 @@ describe('AgentsService', () => {
   });
 
   describe('findAll', () => {
-    it('returns all agents', async () => {
-      const agents = [
+    it('returns agents', async () => {
+      const agents: Agent[] = [
         {
           id: '1',
           name: 'Agent 1',
-          hostname: 'host1',
+          hostname: 'h1',
           os: 'linux',
           agentToken: 'token1',
           status: AgentStatus.ONLINE,
-          lastSeen: new Date(),
+          lastSeen: null,
           createdAt: new Date(),
         },
       ];
+
       prisma.agent.findMany.mockResolvedValue(agents);
 
-      await expect(service.findAll()).resolves.toEqual(agents);
+      const result = await service.findAll();
+
+      expect(result).toEqual(agents);
       expect(prisma.agent.findMany).toHaveBeenCalled();
     });
   });
 
   describe('findOne', () => {
-    it('returns the requested agent', async () => {
-      const agent = {
-        id: '123',
-        name: 'Agent 123',
-        hostname: 'host123',
+    it('returns agent', async () => {
+      const agent: Agent = {
+        id: '1',
+        name: 'Agent 1',
+        hostname: 'h1',
         os: 'linux',
-        agentToken: 'token-123',
-        status: AgentStatus.OFFLINE,
+        agentToken: 'token1',
+        status: AgentStatus.ONLINE,
         lastSeen: null,
         createdAt: new Date(),
       };
       prisma.agent.findUnique.mockResolvedValue(agent);
 
-      await expect(service.findOne('123')).resolves.toEqual(agent);
-      expect(prisma.agent.findUnique).toHaveBeenCalledWith({
-        where: { id: '123' },
-      });
+      const result = await service.findOne('1');
+
+      expect(result).toEqual(agent);
     });
 
-    it('returns null when agent is missing', async () => {
+    it('returns null when missing', async () => {
       prisma.agent.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('missing')).resolves.toBeNull();
+      const result = await service.findOne('x');
+
+      expect(result).toBeNull();
     });
   });
 
   describe('create', () => {
-    const dto: CreateAgentDto = {
-      name: 'New Agent',
-      hostname: 'new-host',
-      os: 'linux',
-      agentToken: 'new-token',
-    };
+    const dto: CreateAgentDto = { name: 'Agent X' };
 
-    it('stores a agent', async () => {
-      prisma.agent.create.mockResolvedValue(undefined);
-
-      await service.create(dto);
-
-      expect(prisma.agent.create).toHaveBeenCalledWith({
-        data: {
-          name: dto.name,
-          hostname: dto.hostname,
-          os: dto.os,
-          agentToken: dto.agentToken,
-        },
+    it('creates agent and returns raw token', async () => {
+      prisma.agent.create.mockResolvedValue({
+        id: '1',
+        name: 'Agent X',
+        hostname: 'xxx',
+        os: 'x',
+        agentToken: 'xxxx',
+        status: AgentStatus.OFFLINE,
+        lastSeen: new Date(),
+        createdAt: new Date(),
       });
+
+      const result = await service.create(dto);
+
+      expect(result.name).toBe('Agent X');
+      expect(result.token).toHaveLength(20);
+
+      const callData = prisma.agent.create.mock.calls[0][0].data;
+      expect(callData.agentToken).not.toBe(result.token);
     });
 
-    it('throws ConflictException when agentToken already exists', async () => {
-      prisma.agent.create.mockRejectedValue(createPrismaError('P2002'));
+    it('throws ConflictException on name duplicate', async () => {
+      prisma.agent.create.mockRejectedValue(
+        createPrismaError('P2002', { target: ['Agent_name_key'] }),
+      );
 
       await expect(service.create(dto)).rejects.toBeInstanceOf(
         ConflictException,
@@ -133,77 +185,199 @@ describe('AgentsService', () => {
     });
   });
 
-  describe('update', () => {
-    it('updates provided fields', async () => {
-      const dto: UpdateAgentDto = {
-        name: 'Updated',
-        hostname: 'updated-host',
-        os: 'windows',
-        agentToken: 'updated-token',
+  describe('updateName', () => {
+    it('updates name', async () => {
+      const updated: Agent = {
+        id: '1',
+        name: 'New Name',
+        hostname: 'h1',
+        os: 'linux',
+        agentToken: 't1',
         status: AgentStatus.ONLINE,
+        lastSeen: null,
+        createdAt: new Date(),
       };
-      prisma.agent.update.mockResolvedValue(undefined);
+      prisma.agent.update.mockResolvedValue(updated);
 
-      await service.update('agent-id', dto);
+      const dto: UpdateAgentNameDto = { name: 'New Name' };
+      await service.updateName('1', dto);
 
       expect(prisma.agent.update).toHaveBeenCalledWith({
-        where: { id: 'agent-id' },
-        data: {
-          name: dto.name,
-          hostname: dto.hostname,
-          os: dto.os,
-          agentToken: dto.agentToken,
-          status: dto.status,
-        },
+        where: { id: '1' },
+        data: { name: 'New Name' },
       });
     });
 
-    it('throws NotFoundException when agent is missing', async () => {
+    it('throws NotFoundException', async () => {
       prisma.agent.update.mockRejectedValue(createPrismaError('P2025'));
 
       await expect(
-        service.update('missing', {
-          name: 'noop',
-          hostname: 'noop-host',
-          os: 'linux',
-          agentToken: 'noop-token',
-          status: AgentStatus.OFFLINE,
-        }),
+        service.updateName('x', { name: 'A' }),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('throws ConflictException when agentToken is duplicated', async () => {
-      prisma.agent.update.mockRejectedValue(createPrismaError('P2002'));
+    it('throws ConflictException on duplicate', async () => {
+      prisma.agent.update.mockRejectedValue(
+        createPrismaError('P2002', { target: ['Agent_name_key'] }),
+      );
 
       await expect(
-        service.update('id', {
-          name: 'Agent',
-          hostname: 'host',
-          os: 'linux',
-          agentToken: 'dup-token',
-          status: AgentStatus.ONLINE,
-        }),
+        service.updateName('1', { name: 'Dup' }),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
 
-  describe('delete', () => {
-    it('deletes the agent by id', async () => {
-      prisma.agent.delete.mockResolvedValue(undefined);
+  describe('updateStatus', () => {
+    it('updates status', async () => {
+      const updated: Agent = {
+        id: '1',
+        name: 'Agent 1',
+        hostname: 'h1',
+        os: 'linux',
+        agentToken: 't1',
+        status: AgentStatus.ONLINE,
+        lastSeen: null,
+        createdAt: new Date(),
+      };
+      prisma.agent.update.mockResolvedValue(updated);
 
-      await service.delete('to-delete');
+      const dto: UpdateAgentStatusDto = { status: AgentStatus.ONLINE };
+      await service.updateStatus('1', dto);
 
-      expect(prisma.agent.delete).toHaveBeenCalledWith({
-        where: { id: 'to-delete' },
+      expect(prisma.agent.update).toHaveBeenCalledWith({
+        where: { id: '1' },
+        data: { status: AgentStatus.ONLINE },
       });
     });
 
-    it('throws NotFoundException when delete misses a record', async () => {
-      prisma.agent.delete.mockRejectedValue(createPrismaError('P2025'));
+    it('throws NotFoundException', async () => {
+      prisma.agent.update.mockRejectedValue(createPrismaError('P2025'));
 
-      await expect(service.delete('missing')).rejects.toBeInstanceOf(
+      await expect(
+        service.updateStatus('x', { status: AgentStatus.OFFLINE }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('updateToken', () => {
+    it('generates new token and stores hash', async () => {
+      const updated: Agent = {
+        id: '1',
+        name: 'Agent 1',
+        hostname: 'h1',
+        os: 'linux',
+        agentToken: 't1',
+        status: AgentStatus.ONLINE,
+        lastSeen: null,
+        createdAt: new Date(),
+      };
+      prisma.agent.update.mockResolvedValue(updated);
+
+      const result = await service.updateToken('1');
+
+      expect(result.token).toHaveLength(20);
+
+      const data = prisma.agent.update.mock.calls[0][0].data;
+      expect(data.agentToken).not.toBe(result.token);
+    });
+
+    it('throws NotFoundException', async () => {
+      prisma.agent.update.mockRejectedValue(createPrismaError('P2025'));
+
+      await expect(service.updateToken('x')).rejects.toBeInstanceOf(
         NotFoundException,
       );
+    });
+  });
+
+  describe('delete', () => {
+    it('deletes agent', async () => {
+      const deleted: Agent = {
+        id: '1',
+        name: 'Agent 1',
+        hostname: 'h1',
+        os: 'linux',
+        agentToken: 't1',
+        status: AgentStatus.OFFLINE,
+        lastSeen: null,
+        createdAt: new Date(),
+      };
+      prisma.agent.delete.mockResolvedValue(deleted);
+
+      await service.delete('1');
+
+      expect(prisma.agent.delete).toHaveBeenCalledWith({
+        where: { id: '1' },
+      });
+    });
+
+    it('throws NotFoundException', async () => {
+      prisma.agent.delete.mockRejectedValue(createPrismaError('P2025'));
+
+      await expect(service.delete('x')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('agentsStats', () => {
+    it('returns stats', async () => {
+      prisma.agent.groupBy.mockResolvedValue([
+        {
+          id: '1',
+          name: 'a',
+          hostname: 'h1',
+          os: 'linux',
+          agentToken: 't1',
+          status: AgentStatus.ONLINE,
+          lastSeen: null,
+          createdAt: new Date(),
+          _count: {
+            _all: 3,
+            id: 0,
+            name: 0,
+            hostname: 0,
+            os: 0,
+            agentToken: 0,
+            status: 0,
+            lastSeen: 0,
+            createdAt: 0,
+          },
+          _max: {},
+          _min: {},
+        },
+        {
+          id: '2',
+          name: 'b',
+          hostname: 'h2',
+          os: 'linux',
+          agentToken: 't2',
+          status: AgentStatus.OFFLINE,
+          lastSeen: null,
+          createdAt: new Date(),
+          _count: {
+            _all: 2,
+            id: 0,
+            name: 0,
+            hostname: 0,
+            os: 0,
+            agentToken: 0,
+            status: 0,
+            lastSeen: 0,
+            createdAt: 0,
+          },
+          _max: {},
+          _min: {},
+        },
+      ]);
+
+      const result = await service.agentsStats();
+
+      expect(result).toEqual({
+        total: 5,
+        online: 3,
+        offline: 2,
+      });
     });
   });
 });

@@ -26,13 +26,13 @@ describe('MetricsGrpcController', () => {
   it('calls service.create for streamed metrics', async () => {
     const chunk: CreateMetricDto[] = [
       {
-        deviceId: 'd',
+        agentId: 'd',
         name: MetricName.CPU_USAGE,
         value: 1,
         timestamp: { seconds: 1 },
       },
       {
-        deviceId: 'd',
+        agentId: 'd',
         name: MetricName.RAM_USAGE,
         value: 2,
         timestamp: { seconds: 2 },

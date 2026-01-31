@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit2, RotateCw, Trash2 } from "lucide-react";
-import { useState } from "react";
 import { AgentManagment } from "@/lib/types";
 
 type AgentsManagementTableProps = {
@@ -51,7 +50,7 @@ export default function AgentsManagmentTable(
                       variant="ghost"
                       size="sm"
                       onClick={() => onRename({ id: agent.id, name: agent.name })}
-                      className="text-slate-400 hover:text-slate-200"
+                      className="text-slate-400 hover:text-slate-200 cursor-pointer"
                     >
                       <Edit2 className="w-4 h-4" />
                     </Button>
@@ -59,7 +58,7 @@ export default function AgentsManagmentTable(
                       variant="ghost"
                       size="sm"
                       onClick={() => onRotateToken({ id: agent.id, name: agent.name })}
-                      className="text-yellow-400 hover:text-yellow-300"
+                      className="text-yellow-400 hover:text-yellow-300 cursor-pointer"
                     >
                       <RotateCw className="w-4 h-4" />
                     </Button>
@@ -67,7 +66,7 @@ export default function AgentsManagmentTable(
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete({ id: agent.id, name: agent.name })}
-                      className="text-red-400 hover:text-red-300"
+                      className="text-red-400 hover:text-red-300 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

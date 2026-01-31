@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 type AgentsManagementHeaderProps = {
   open: boolean;
   addError?: string;
+  isAdding: boolean
 
   onSubmit: (agentName: string) => Promise<void>;
   onOpen: () => void;
@@ -26,10 +27,10 @@ export default function AgentsManagementHeader({
   onSubmit,
   onOpen,
   onClose,
+  isAdding
 }: AgentsManagementHeaderProps) {
   const [newAgentName, setNewAgentName] = useState("");
 
-  // reset input when dialog closes
   useEffect(() => {
     if (!open) {
       setNewAgentName("");
@@ -52,16 +53,14 @@ export default function AgentsManagementHeader({
         </p>
       </div>
 
-      {/* OPEN BUTTON */}
       <Button
-        className="bg-blue-600 hover:bg-blue-700"
+        className="bg-blue-600 hover:bg-blue-700 cursor-pointer"
         onClick={onOpen}
       >
         <Plus className="w-4 h-4 mr-2" />
         Dodaj agenta
       </Button>
 
-      {/* DIALOG */}
       <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
         <DialogContent className="bg-slate-900 border-slate-800 text-slate-100">
           <DialogHeader>
@@ -100,7 +99,7 @@ export default function AgentsManagementHeader({
             <div className="flex justify-end space-x-2">
               <Button
                 variant="ghost"
-                className="text-slate-400"
+                className="text-slate-400 cursor-pointer"
                 onClick={onClose}
               >
                 Anuluj
@@ -108,10 +107,10 @@ export default function AgentsManagementHeader({
 
               <Button
                 onClick={handleSubmit}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 cursor-pointer"
                 disabled={!newAgentName.trim()}
               >
-                Dodaj agenta
+                {isAdding ? "Dodawanie..." : "Dodaj agenta"}
               </Button>
             </div>
           </div>

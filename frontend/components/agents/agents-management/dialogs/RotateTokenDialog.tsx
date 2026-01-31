@@ -84,14 +84,14 @@ export default function RotateAgentTokenDialog({
 
           <AlertDialogFooter>
             <AlertDialogCancel
-              className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
+              className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 cursor-pointer"
               onClick={onClose}
             >
               Anuluj
             </AlertDialogCancel>
 
             <Button
-              className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white cursor-pointer"
               onClick={() => onConfirm(agentId)}
             >
               Wygeneruj
@@ -133,7 +133,7 @@ export default function RotateAgentTokenDialog({
                   variant="ghost"
                   size="sm"
                   onClick={() => setTokenVisible(!tokenVisible)}
-                  className="absolute top-2 right-2 text-slate-400 hover:text-slate-200"
+                  className="absolute top-2 right-2 text-slate-400 hover:text-slate-200 cursor-pointer"
                 >
                   {tokenVisible ? (
                     <EyeOff className="w-4 h-4" />
@@ -145,7 +145,7 @@ export default function RotateAgentTokenDialog({
 
               <Button
                 onClick={copyToken}
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-blue-600 hover:bg-blue-700 cursor-pointer"
               >
                 {tokenCopied ? (
                   <>

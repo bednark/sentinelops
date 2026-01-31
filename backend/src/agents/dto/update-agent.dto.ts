@@ -1,23 +1,13 @@
 import { IsEnum, IsString, IsOptional } from 'class-validator';
-import { AgentStatus } from './create-agent.dto';
+import { AgentStatus } from '../../../generated/prisma/client';
 
-export class UpdateAgentDto {
+export class UpdateAgentNameDto {
   @IsString()
   @IsOptional()
   name: string;
+}
 
-  @IsString()
-  @IsOptional()
-  hostname: string;
-
-  @IsString()
-  @IsOptional()
-  os: string;
-
-  @IsString()
-  @IsOptional()
-  agentToken: string;
-
+export class UpdateAgentStatusDto {
   @IsEnum(AgentStatus)
   @IsOptional()
   status: AgentStatus;

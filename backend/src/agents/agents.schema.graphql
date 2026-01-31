@@ -2,12 +2,12 @@ scalar DateTime
 
 type Agent {
   id: ID!
-  name: String!
-  hostname: String!
-  os: String!
+  name: String
+  hostname: String
+  os: String
   status: AgentStatus!
   lastSeen: DateTime
-  createdAt: DateTime!
+  createdAt: DateTime
 }
 
 enum AgentStatus {
@@ -21,8 +21,22 @@ type AgentsStats {
   offline: Int!
 }
 
+input AddAgent {
+  name: String!
+}
+
+type AddAgentResponse {
+  id: ID!
+  name: String!
+  token: String!
+}
+
 type Query {
   agents: [Agent!]!
   agent(id: ID!): Agent
   agentsStats: AgentsStats!
+}
+
+type Mutation {
+  addAgent(input: AddAgent!): AddAgentResponse!
 }

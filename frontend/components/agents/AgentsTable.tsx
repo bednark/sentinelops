@@ -64,13 +64,13 @@ const columns: ColumnDef<Agent>[] = [
     accessorKey: "hostname",
     header: "Nazwa hosta",
     meta: { className: "hidden md:table-cell" },
-    cell: ({ row }) => row.getValue("hostname"),
+    cell: ({ row }) => row.getValue("hostname") ?? "-",
   },
   {
     accessorKey: "os",
     header: "System operacyjny",
     meta: { className: "hidden sm:table-cell" },
-    cell: ({ row }) => row.getValue("os"),
+    cell: ({ row }) => row.getValue("os") ?? "-",
   },
   {
     accessorKey: "status",

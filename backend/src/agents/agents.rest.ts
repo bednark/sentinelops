@@ -7,10 +7,14 @@ import {
   Patch,
   HttpCode,
   Delete,
+  NotFoundException,
 } from '@nestjs/common';
 import { AgentsService } from './agents.service';
 import { CreateAgentDto } from './dto/create-agent.dto';
-import { UpdateAgentDto } from './dto/update-agent.dto';
+import {
+  UpdateAgentNameDto,
+  UpdateAgentStatusDto,
+} from './dto/update-agent.dto';
 
 @Controller('agents')
 export class AgentsRestController {
@@ -22,25 +26,47 @@ export class AgentsRestController {
   }
 
   @Get(':id')
-  getAgent(@Param('id') id: string) {
-    return this.agentsService.findOne(id);
+  async getAgent(@Param('id') id: string) {
+    const agent = await this.agentsService.findOne(id);
+    if (!agent) {
+      throw new NotFoundException(`Agent with id '${id}' not found`);
+    }
+    return agent;
   }
 
   @Post()
   @HttpCode(201)
   async createAgent(@Body() dto: CreateAgentDto) {
-    await this.agentsService.create(dto);
+    return this.agentsService.create(dto);
   }
 
-  @Patch(':id')
+  @Patch(':id/update-name')
   @HttpCode(204)
-  async updateAgent(@Param('id') id: string, @Body() dto: UpdateAgentDto) {
-    await this.agentsService.update(id, dto);
+  async updateAgentName(
+    @Param('id') id: string,
+    @Body() dto: UpdateAgentNameDto,
+  ) {
+    await this.agentsService.updateName(id, dto);
+  }
+
+  @Patch(':id/update-status')
+  @HttpCode(204)
+  async updateAgentStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateAgentStatusDto,
+  ) {
+    await this.agentsService.updateStatus(id, dto);
+  }
+
+  @Patch(':id/update-token')
+  @HttpCode(200)
+  async updateAgentToken(@Param('id') id: string) {
+    return this.agentsService.updateToken(id);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  deleteAgent(@Param('id') id: string) {
-    return this.agentsService.delete(id);
+  async deleteAgent(@Param('id') id: string) {
+    await this.agentsService.delete(id);
   }
 }

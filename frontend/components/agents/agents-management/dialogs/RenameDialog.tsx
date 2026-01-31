@@ -80,14 +80,14 @@ export default function RenameDialog({
             <Button
               variant="ghost"
               onClick={onClose}
-              className="text-slate-400"
+              className="text-slate-400 cursor-pointer"
             >
               Anuluj
             </Button>
 
             <Button
               onClick={handleRename}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 cursor-pointer"
               disabled={!name.trim() || name === currentName}
             >
               Zapisz

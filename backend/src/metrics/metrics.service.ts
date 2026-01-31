@@ -104,7 +104,6 @@ export class MetricsService {
       ]);
 
       return result[0].count;
-
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2003') {

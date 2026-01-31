@@ -7,7 +7,7 @@ import DeleteDialog from "@/components/agents/agents-management/dialogs/DeleteDi
 import RenameDialog from "@/components/agents/agents-management/dialogs/RenameDialog";
 import RotateTokenDialog from "@/components/agents/agents-management/dialogs/RotateTokenDialog";
 import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 import { AgentManagment } from "@/lib/types";
 
 const AGENTS_QUERY = gql`
@@ -20,15 +20,41 @@ const AGENTS_QUERY = gql`
   }
 `;
 
+const ADD_AGENT_MUTATION = gql`
+  mutation AddAgent($input: AddAgent!) {
+    addAgent(input: $input) {
+      id
+      name
+      token
+    }
+  }
+`;
+
+type AddAgentResponse = {
+  addAgent: {
+    id: string;
+    name: string;
+    token: string;
+    createdAt: string;
+  };
+};
+
+type AddAgentVariables = {
+  input: {
+    name: string;
+  };
+};
+
 type AgentsQueryResponse = {
   agents: AgentManagment[];
 }
 
 export default function AgentManagementPage() {
-  const [fetchAgents, { data, loading }] =
+  const [fetchAgents, { data, loading: agentsLoading }] =
     useLazyQuery<AgentsQueryResponse>(AGENTS_QUERY, {
       fetchPolicy: "network-only",
     });
+  const [addAgent, { loading: addLoading }] = useMutation<AddAgentResponse, AddAgentVariables>(ADD_AGENT_MUTATION);
 
   useEffect(() => {
     fetchAgents();
@@ -78,14 +104,38 @@ export default function AgentManagementPage() {
   const [addError, setAddError] = useState("");
 
   const handleAddAgent = async (agentName: string) => {
-    setAddDialogOpen(false);
-    setRotateDialog({
-      step: "token",
-      token: "nowytoken123",
-    });
+    setAddError("");
+
+    try {
+      const result = await addAgent({
+        variables: {
+          input: { name: agentName },
+        },
+      });
+
+      const newAgent = result.data?.addAgent;
+
+      if (!newAgent) {
+        setAddError("Nie udało się utworzyć agenta. Spróbuj ponownie.");
+        return;
+      }
+
+      setAddDialogOpen(false);
+
+      setRotateDialog({
+        step: "token",
+        agentId: newAgent.id,
+        agentName: newAgent.name,
+        token: newAgent.token,
+      });
+
+      fetchAgents();
+    } catch (e: any) {
+      setAddError("Wystąpił błąd podczas tworzenia agenta");
+    }
   };
 
-  if (loading) {
+  if (agentsLoading) {
     return (
       <div className="p-8">
         <div className="flex items-center justify-center">
@@ -95,14 +145,20 @@ export default function AgentManagementPage() {
     );
   }
 
+  const closeAddDialog = () => {
+    setAddDialogOpen(false);
+    setAddError("");
+  }
+
   return (
     <div className="p-8">
       <AgentsManagementHeader
         open={addDialogOpen}
         addError={addError}
         onOpen={() => setAddDialogOpen(true)}
-        onClose={() => setAddDialogOpen(false)}
+        onClose={closeAddDialog}
         onSubmit={handleAddAgent}
+        isAdding={addLoading}
       />
       <AgentsManagementTable
         agents={agents}
